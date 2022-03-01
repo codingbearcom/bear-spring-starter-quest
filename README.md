@@ -1,104 +1,159 @@
-![Coding Bear logo](coding-bear/logo.png)
+# Bear Spring Starter Quest
 
-# Bear Spring Starter
+## Prerequisites
 
-## What is it?
-**Bear Spring Starter** is a no-nonsense Spring project skeleton that includes all basic libraries and configurations
-that Coding Bear programmers find useful for quick spin-up of a new project.
+- Java dev environment (JDK + IDE)
+- Docker and Docker compose
 
-## Why are we sharing this?
-Setting up new project can be a lengthy and painful process with lot of trial and error, 
-that can take from several hours up to several working days, depending on your experience-level and on how often you face 
-such a situation. 
 
-We at Coding Bear felt the need for a go-to skeleton, that we could use each time we start working on something new and 
-that would save us from doing repetitive work. With our starter skeleton, we can (almost) skip the set-up phase, 
-spend our time in a more efficient manner and save our clients some money.
+## Quest 1
 
-And because we love, use and benefit from open source, now when we have this opportunity, it feels like a right time to give 
-something back.
+Implement simple todo REST API with following endpoints
 
-## How should you use it?
-At your own risk :-) Browse the code, adjust it to your taste, build something useful on top of it. 
+### Endpoint for listing todos (v1)
 
-## Is it under active development?
-Depends, rather occasionally. We want to keep the skeleton reasonably up to date (i.e. not necessarily always the latest version of all the libraries, 
-but the ones we are currently using). We also plan to add more features later on, but at the same time, the project should not get overly complex.
-We described this as a "no-nonsense" skeleton and we'd like to keep it as such.   
-Thus, we might create a feature-richer version in a separate repository in the future or create a separate branch. 
+Response (200):
 
-## Can I help?
-Definitely, feel free to open issues and pull requests. Don't hesitate to comment, fork, contact us and give feedback.
-
-# Quick feature overview
-The tech stack is recent while still being slightly conservative and time-proven. It reflects how we think main-stream modern 
-applications are (or should be) built today.
-
-## Technical features
-* Gradle wrapper, Kotlin based Gradle build scripts
-* Spring Boot
-* dependency injection
-* Spring Data, JPA, PostgreSQL
-* REST API (JAX-RS / RestEasy)
-* JUnit5, integration tests using Docker, Mockito
-* custom-built .gitignore
-* sample Sonar integration
-
-## Sample use case
-The project also contains one sample end-to-end scenario. 
-
-* fully functional sample "user" REST endpoint, service and repository
-* prepared connection to PostgreSQL database through Spring JPA
-* sample unit test and integration test
-
-# Usage
-
-## Development database
-
-Project includes Gradle plugin that allows simple spin-ups of docker-compose containing PostgreSQL instance by running Gradle task.
-
-To change container settings, simply edit YAML config file in `/config/docker/environment-compose.yml`. These changes should then be propagated to Hibernate configuration in all applications depending on this database (namely `application.yml` config files in resource folder of each runnable project).
-
-All configuration happens in `/config/docker/environment-compose.yml` file. It obeys [standard compose file structure](https://docs.docker.com/compose/compose-file/).
-
-Hook up of Gradle plugin happens in `/build.gradle.kts` script.
-
-## Running the project
-
-### Build
-* To perform only common build, run `./gradlew clean build`
-* To build and run tests, run `./gradlew clean build integrationTests`
-* To create an executable jar file `./gradlew bootJar` (it should be created in `/application/build/libs`)
-
-### Develpoment PostgreSQL database
-
-```bash
-./gradlew composeUp
+```json
+[
+  {
+    "id": 1,
+    "task": "Do shopping",
+    "done": false
+  }, {
+    "id": 2,
+    "task": "Morning jogging",
+    "done": true
+  }
+]
 ```
 
-This will start a PostgreSQL DB instance running in the docker container and applies the `application/src/main/resources/sql/schema.sql` script.
+### Endpoint for creating new todo (v1)
 
-You can use e.g. `psql -h localhost -U postgres -d bss` to connect to the DB and browse the structure.
+Request body:
 
-### Sample project
+```json
+{
+  "task": "Water flowers"
+}
+```
 
-Sample project depends on having database running, so remember to spin it up (project includes option to run instance in Docker container included as Gradle task in root build script - see [Running PostgreSQL database](#postgresql-database)).
+Response (201):
 
-Application can be started in multiple ways. 
+```json
+{
+  "id": 3,
+  "task": "Water flowers",
+  "done": false
+}
+```
 
-* use your favourite IDE to run it in a standard or debug mode.
-* type `./gradlew bootRun` in terminal
-* use `java -jar <executable.jar>` (executable jar file has to be created first)
+### Endpoint for updating existing todo (v1)
 
-### Sample Sonar integration
+- allows changing `task` and `done` fields (`id` is immutable)
 
-Edit `gradle.properties` and set your Sonar instance URI and authentication token, then run `./gradlew sonarqube` and check the result of the 
-analysis in your Sonar's interface.
+Request body:
 
-# Licence
-This software is licenced under MIT Licence.
+```json
+{
+  "done": true
+}
+```
 
-# About Coding Bear
 
-* We are Prague-based software company with passion for doing things better. We love to deliver clean and efficient code.   
-* See more of what we do and what we can do for you at our [website](https://codingbear.com).
+Response (200):
+
+```json
+{
+  "id": 3,
+  "task": "Water flowers",
+  "done": true
+}
+```
+
+**When done save send your work at this point as commit.**
+
+
+## Quest 2
+
+Add Flyway into the project and make sure everything works correctly, namely:
+- same schema is created via Flyway,
+- existing data gets gracefully migrated.
+
+**When done save send your work at this point as commit.**
+
+
+## Quest 3
+
+Let's extend our Todo app **while being backward compatible**
+(i.e. all endpoints made in quest 1 should stay as are).
+
+## Endpoint for listing todos (v2)
+
+Response (200):
+
+```json
+[
+  {
+    "id": 1,
+    "task": "Do shopping",
+    "created": "2022-02-28T11:27:42Z",
+    "done": null
+  }, {
+    "id": 2,
+    "task": "Morning jogging",
+    "created": "2022-02-28T13:08:42Z",
+    "done": "2022-03-01T07:27:42Z"
+  }
+]
+```
+
+## Endpoint for creating new todo (v2)
+
+(old endpoint with new logic)
+
+Request body:
+
+```json
+{
+  "task": "Water flowers"
+}
+```
+
+Response (201):
+
+```json
+{
+  "id": 3,
+  "task": "Water flowers",
+  "created": "2022-03-01T15:08:42Z",
+  "done": null
+}
+```
+
+### Endpoint for updating existing todo (v2)
+
+- allows changing `task` and `done` fields (`id` is immutable)
+
+Request body:
+
+```json
+{
+  "done": true
+}
+```
+
+
+Response (200):
+
+```json
+{
+  "id": 3,
+  "task": "Water flowers",
+  "created": "2022-03-01T15:08:42Z",
+  "done": "2022-03-01T17:58:42Z"
+}
+```
+
+
+**When done save send your work at this point as commit.**
